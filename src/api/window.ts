@@ -1,9 +1,17 @@
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow';
 
+interface OpenRepoWindowOptions {
+  showAddDialog?: boolean;
+}
+
 /**
  * Open a repository in a new window
  */
-export async function openRepoWindow(path: string, name: string): Promise<void> {
+export async function openRepoWindow(
+  path: string,
+  name: string,
+  options?: OpenRepoWindowOptions
+): Promise<void> {
   // Create unique window label from path
   const label = `repo-${path.replace(/[^a-zA-Z0-9]/g, '-').slice(-50)}`;
 
@@ -14,9 +22,15 @@ export async function openRepoWindow(path: string, name: string): Promise<void> 
     return;
   }
 
+  // Build URL with optional add dialog flag
+  let url = `/repo/window?path=${encodeURIComponent(path)}&name=${encodeURIComponent(name)}`;
+  if (options?.showAddDialog) {
+    url += '&showAddDialog=true';
+  }
+
   // Create new window
   const webview = new WebviewWindow(label, {
-    url: `/repo/window?path=${encodeURIComponent(path)}&name=${encodeURIComponent(name)}`,
+    url,
     title: name,
     width: 1200,
     height: 800,

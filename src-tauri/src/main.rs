@@ -62,11 +62,13 @@ fn handle_client(mut stream: UnixStream, app: AppHandle) {
                 let path = parts[0].to_string();
                 let is_git = parts.get(1).map(|t| *t == "git").unwrap_or(true);
 
-                // Emit event with path and type info
-                let _ = app.emit("open-path", serde_json::json!({
-                    "path": path,
-                    "isGit": is_git
-                }));
+                // Emit event with path and type info - only to main window
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.emit("open-path", serde_json::json!({
+                        "path": path,
+                        "isGit": is_git
+                    }));
+                }
             }
 
             // Focus window

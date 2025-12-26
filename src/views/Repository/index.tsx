@@ -19,7 +19,7 @@ interface CommitInfo {
 interface FileInfo {
     path: string;
     status: string;
-    statusCode: 'A' | 'M' | 'D' | 'R';
+    statusCode: string;
 }
 
 interface RepositoryProps {

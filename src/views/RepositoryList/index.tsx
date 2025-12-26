@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { listen } from '@tauri-apps/api/event';
 import { RepoIcon } from '../../components/git/RepoIcon';
 import { BranchBadge } from '../../components/git/BranchBadge';
 import { Button } from '../../components/common/Button';
@@ -38,6 +39,16 @@ export function RepositoryList() {
 
     useEffect(() => {
         loadRepositories();
+    }, []);
+
+    // Listen for refresh event from App dialog
+    useEffect(() => {
+        const unlisten = listen('repo-list-refresh', () => {
+            loadRepositories();
+        });
+        return () => {
+            unlisten.then((fn) => fn());
+        };
     }, []);
 
     // Close context menu on click outside
