@@ -1,11 +1,13 @@
+import { useState, useEffect } from 'react';
 import { ResizablePanel } from '../../../components/common/ResizablePanel';
 import { FileStatusBadge } from '../../../components/git/FileStatusBadge';
+import { getStatus, stageFile, unstageFile } from '../../../api';
 import './FileList.css';
 
 interface FileInfo {
     path: string;
     status: string;
-    statusCode: string;
+    status_code: string;
 }
 
 interface FileListProps {
@@ -17,33 +19,64 @@ interface FileListProps {
 }
 
 export function FileList({
+    repoPath,
     stagedHeight,
     onStagedHeightChange,
-    selectedFile,
+    selected File,
     onSelectFile,
 }: FileListProps) {
-    // TODO: Fetch from backend
-    const stagedFiles: FileInfo[] = [
-        { path: 'src/main.ts', status: 'Modified', statusCode: 'M' },
-        { path: 'src/utils.ts', status: 'Added', statusCode: 'A' },
-    ];
+    const [stagedFiles, setStagedFiles] = useState<FileInfo[]>([]);
+    const [unstagedFiles, setUnstagedFiles] = useState<FileInfo[]>([]);
+    const [loading, setLoading] = useState(false);
 
-    const unstagedFiles: FileInfo[] = [
-        { path: 'src/app.tsx', status: 'Modified', statusCode: 'M' },
-        { path: 'src/index.css', status: 'Modified', statusCode: 'M' },
-        { path: 'README.md', status: 'Modified', statusCode: 'M' },
-        { path: 'new-file.txt', status: 'Untracked', statusCode: 'U' },
-    ];
-
-    const handleStageFile = (path: string) => {
-        console.log('Stage file:', path);
-        // TODO: Call backend
+    // Fetch file status
+    const loadStatus = async () => {
+        try {
+            setLoading(true);
+            const status = await getStatus(repoPath);
+            setStagedFiles(status.staged);
+            setUnstagedFiles(status.unstaged);
+        } catch (error) {
+            console.error('Failed to load status:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleUnstageFile = (path: string) => {
-        console.log('Unstage file:', path);
-        // TODO: Call backend
+    // Load status on mount and when repo changes
+    useEffect(() => {
+        loadStatus();
+    }, [repoPath]);
+
+    // Handle stage file
+    const handleStageFile = async (path: string) => {
+        try {
+            await stageFile(repoPath, path);
+            await loadStatus(); // Reload after staging
+        } catch (error) {
+            console.error('Failed to stage file:', error);
+            alert(`Failed to stage file: ${error}`);
+        }
     };
+
+    // Handle unstage file
+    const handleUnstageFile = async (path: string) => {
+        try {
+            await unstageFile(repoPath, path);
+            await loadStatus(); // Reload after unstaging
+        } catch (error) {
+            console.error('Failed to unstage file:', error);
+            alert(`Failed to unstage file: ${error}`);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="file-list">
+                <div className="file-list__loading">Loading files...</div>
+            </div>
+        );
+    }
 
     return (
         <div className="file-list">
@@ -57,10 +90,12 @@ export function FileList({
                 first={
                     <div className="file-list__section">
                         <div className="file-list__header">
-                            <span className="file-list__title">
-                                ✓ Staged ({stagedFiles.length})
-                            </span>
-                            <button className="file-list__action" title="Unstage All">
+                            <span className="file-list__title">✓ Staged ({stagedFiles.length})</span>
+                            <button
+                                className="file-list__action"
+                                title="Unstage All"
+                                disabled={stagedFiles.length === 0}
+                            >
                                 −
                             </button>
                         </div>
@@ -78,7 +113,7 @@ export function FileList({
                                         onChange={() => handleUnstageFile(file.path)}
                                         onClick={(e) => e.stopPropagation()}
                                     />
-                                    <FileStatusBadge status={file.statusCode} />
+                                    <FileStatusBadge status={file.status_code} />
                                     <span className="file-item__path">{file.path}</span>
                                     <button className="file-item__menu" onClick={(e) => e.stopPropagation()}>
                                         ⋮
@@ -94,10 +129,12 @@ export function FileList({
                 second={
                     <div className="file-list__section">
                         <div className="file-list__header">
-                            <span className="file-list__title">
-                                ○ Unstaged ({unstagedFiles.length})
-                            </span>
-                            <button className="file-list__action" title="Stage All">
+                            <span className="file-list__title">○ Unstaged ({unstagedFiles.length})</span>
+                            <button
+                                className="file-list__action"
+                                title="Stage All"
+                                disabled={unstagedFiles.length === 0}
+                            >
                                 +
                             </button>
                         </div>
@@ -115,7 +152,7 @@ export function FileList({
                                         onChange={() => handleStageFile(file.path)}
                                         onClick={(e) => e.stopPropagation()}
                                     />
-                                    <FileStatusBadge status={file.statusCode} />
+                                    <FileStatusBadge status={file.status_code} />
                                     <span className="file-item__path">{file.path}</span>
                                     <button className="file-item__menu" onClick={(e) => e.stopPropagation()}>
                                         ⋮

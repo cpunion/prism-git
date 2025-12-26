@@ -1,5 +1,6 @@
 use git2::{Repository, StatusOptions};
 use crate::models::*;
+use std::path::Path;
 
 /// 打开 Git 仓库
 pub fn open_repository(path: &str) -> Result<RepoInfo, String> {
@@ -224,4 +225,102 @@ pub fn get_file_diff(path: &str, file_path: &str) -> Result<DiffResponse, String
         file_path: file_path.to_string(),
         hunks,
     })
+}
+
+/// Stage a file (add to index)
+pub fn stage_file(repo_path: &str, file_path: &str) -> Result<(), String> {
+    let repo = Repository::open(repo_path)
+        .map_err(|e| format!("无法打开仓库: {}", e))?;
+
+    let mut index = repo.index()
+        .map_err(|e| format!("无法获取索引: {}", e))?;
+
+    index.add_path(Path::new(file_path))
+        .map_err(|e| format!("添加文件到索引失败: {}", e))?;
+
+    index.write()
+        .map_err(|e| format!("写入索引失败: {}", e))?;
+
+    Ok(())
+}
+
+/// Unstage a file (remove from index)
+pub fn unstage_file(repo_path: &str, file_path: &str) -> Result<(), String> {
+    let repo = Repository::open(repo_path)
+        .map_err(|e| format!("无法打开仓库: {}", e))?;
+
+    let head = repo.head()
+        .map_err(|e| format!("无法获取 HEAD: {}", e))?;
+
+    let head_commit = head.peel_to_commit()
+        .map_err(|e| format!("无法获取 HEAD 提交: {}", e))?;
+
+    let head_tree = head_commit.tree()
+        .map_err(|e| format!("无法获取树: {}", e))?;
+
+    let mut index = repo.index()
+        .map_err(|e| format!("无法获取索引: {}", e))?;
+
+    // Reset the file to HEAD state
+    let path = Path::new(file_path);
+    index.remove_path(path)
+        .map_err(|e| format!("从索引移除文件失败: {}", e))?;
+
+    // Add back from HEAD tree if it exists there
+    if let Ok(entry) = head_tree.get_path(path) {
+        index.add(&git2::IndexEntry {
+            ctime: git2::IndexTime::new(0, 0),
+            mtime: git2::IndexTime::new(0, 0),
+            dev: 0,
+            ino: 0,
+            mode: entry.filemode() as u32,
+            uid: 0,
+            gid: 0,
+            file_size: 0,
+            id: entry.id(),
+            flags: 0,
+            flags_extended: 0,
+            path: file_path.as_bytes().to_vec(),
+        }).map_err(|e| format!("添加文件到索引失败: {}", e))?;
+    }
+
+    index.write()
+        .map_err(|e| format!("写入索引失败: {}", e))?;
+
+    Ok(())
+}
+
+/// Commit staged changes
+pub fn commit_changes(repo_path: &str, message: &str) -> Result<String, String> {
+    let repo = Repository::open(repo_path)
+        .map_err(|e| format!("无法打开仓库: {}", e))?;
+
+    let mut index = repo.index()
+        .map_err(|e| format!("无法获取索引: {}", e))?;
+
+    let tree_id = index.write_tree()
+        .map_err(|e| format!("写入树失败: {}", e))?;
+
+    let tree = repo.find_tree(tree_id)
+        .map_err(|e| format!("查找树失败: {}", e))?;
+
+    let head = repo.head()
+        .map_err(|e| format!("无法获取 HEAD: {}", e))?;
+
+    let parent_commit = head.peel_to_commit()
+        .map_err(|e| format!("无法获取父提交: {}", e))?;
+
+    let sig = repo.signature()
+        .map_err(|e| format!("无法创建签名: {}", e))?;
+
+    let commit_id = repo.commit(
+        Some("HEAD"),
+        &sig,
+        &sig,
+        message,
+        &tree,
+        &[&parent_commit],
+    ).map_err(|e| format!("创建提交失败: {}", e))?;
+
+    Ok(commit_id.to_string())
 }

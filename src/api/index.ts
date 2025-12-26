@@ -94,3 +94,17 @@ export async function initRepository(path: string): Promise<void> {
 export async function getInitialRepoPath(): Promise<string | null> {
   return invoke<string | null>('get_initial_repo_path');
 }
+
+// Stage/Unstage operations
+export async function stageFile(repoPath: string, filePath: string): Promise<void> {
+  return invoke<void>('stage_file', { repo_path: repoPath, file_path: filePath });
+}
+
+export async function unstageFile(repoPath: string, filePath: string): Promise<void> {
+  return invoke<void>('unstage_file', { repo_path: repoPath, file_path: filePath });
+}
+
+// Commit operations
+export async function commitChanges(repoPath: string, message: string): Promise<string> {
+  return invoke<string>('commit_changes', { repo_path: repoPath, message });
+}

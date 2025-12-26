@@ -230,6 +230,31 @@ fn get_initial_repo_path(state: State<AppState>) -> Option<String> {
     state.initial_repo_path.lock().ok().and_then(|guard| guard.clone())
 }
 
+// Tauri 命令：Stage 文件
+#[tauri::command]
+async fn stage_file(repo_path: String, file_path: String) -> Result<(), String> {
+    tokio::task::spawn_blocking(move || git_ops::stage_file(&repo_path, &file_path))
+        .await
+        .map_err(|e| format!("Task error: {}", e))?
+}
+
+// Tauri 命令：Unstage 文件
+#[tauri::command]
+async fn unstage_file(repo_path: String, file_path: String) -> Result<(), String> {
+    tokio::task::spawn_blocking(move || git_ops::unstage_file(&repo_path, &file_path))
+        .await
+        .map_err(|e| format!("Task error: {}", e))?
+}
+
+// Tauri 命令：提交更改
+#[tauri::command]
+async fn commit_changes(repo_path: String, message: String) -> Result<String, String> {
+    tokio::task::spawn_blocking(move || git_ops::commit_changes(&repo_path, &message))
+        .await
+        .map_err(|e| format!("Task error: {}", e))?
+}
+
+
 fn main() {
     // Parse CLI arguments (for direct launch with path)
     let args: Vec<String> = std::env::args().collect();
@@ -274,6 +299,9 @@ fn main() {
             add_repository,
             remove_repository,
             get_initial_repo_path,
+            stage_file,
+            unstage_file,
+            commit_changes,
         ])
         .run(tauri::generate_context!())
         .expect("Error running Tauri application");

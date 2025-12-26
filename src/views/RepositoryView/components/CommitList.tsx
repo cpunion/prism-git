@@ -1,10 +1,13 @@
+import { useState, useEffect } from 'react';
+import { getCommits } from '../../../api';
 import './CommitList.css';
 
 interface CommitInfo {
     id: string;
-    shortId: string;
+    short_id: string;
     message: string;
-    authorName: string;
+    author_name: string;
+    author_email: string;
     timestamp: number;
 }
 
@@ -14,31 +17,26 @@ interface CommitListProps {
     onSelectCommit: (id: string) => void;
 }
 
-export function CommitList({ selectedCommit, onSelectCommit }: CommitListProps) {
-    // TODO: Fetch commits from backend
-    const commits: CommitInfo[] = [
-        {
-            id: '52ba77ab1234567890',
-            shortId: '52ba77ab',
-            message: 'feat: add type support for anonymous struct',
-            authorName: 'visualfc',
-            timestamp: Date.now() / 1000,
-        },
-        {
-            id: 'a9e6e62fb123456789',
-            shortId: 'a9e6e62f',
-            message: 'fix: clean code and remove unused imports',
-            authorName: 'visualfc',
-            timestamp: Date.now() / 1000 - 86400,
-        },
-        {
-            id: '4bcd4e3b123456789',
-            shortId: '4bcd4e3b',
-            message: 'refactor: rename function for clarity',
-            authorName: 'visualfc',
-            timestamp: Date.now() / 1000 - 86400 * 2,
-        },
-    ];
+export function CommitList({ repoPath, selectedCommit, onSelectCommit }: CommitListProps) {
+    const [commits, setCommits] = useState<CommitInfo[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    // Fetch commits
+    const loadCommits = async () => {
+        try {
+            setLoading(true);
+            const data = await getCommits(repoPath, 50, 0);
+            setCommits(data);
+        } catch (error) {
+            console.error('Failed to load commits:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadCommits();
+    }, [repoPath]);
 
     const formatDate = (timestamp: number) => {
         const date = new Date(timestamp * 1000);
@@ -47,6 +45,7 @@ export function CommitList({ selectedCommit, onSelectCommit }: CommitListProps) 
 
         if (diffDays === 0) return 'Today';
         if (diffDays === 1) return 'Yesterday';
+        if (diffDays < 7) return `${diffDays} days ago`;
         return date.toLocaleDateString();
     };
 
@@ -61,17 +60,21 @@ export function CommitList({ selectedCommit, onSelectCommit }: CommitListProps) 
         {} as Record<string, CommitInfo[]>
     );
 
+    if (loading) {
+        return (
+            <div className="commit-list">
+                <div className="commit-list__loading">Loading commits...</div>
+            </div>
+        );
+    }
+
     return (
         <div className="commit-list">
             <div className="commit-list__header">
                 <span className="commit-list__title">Commits</span>
                 <div className="commit-list__filters">
                     <button className="commit-list__filter-btn">All Branches ▾</button>
-                    <input
-                        type="text"
-                        className="commit-list__search"
-                        placeholder="Search commits..."
-                    />
+                    <input type="text" className="commit-list__search" placeholder="Search commits..." />
                 </div>
             </div>
 
@@ -91,14 +94,17 @@ export function CommitList({ selectedCommit, onSelectCommit }: CommitListProps) 
                                 <div className="commit-item__info">
                                     <div className="commit-item__message">{commit.message}</div>
                                     <div className="commit-item__meta">
-                                        <span className="commit-item__hash">{commit.shortId}</span>
-                                        <span className="commit-item__author">{commit.authorName}</span>
+                                        <span className="commit-item__hash">{commit.short_id}</span>
+                                        <span className="commit-item__author">{commit.author_name}</span>
                                     </div>
                                 </div>
                             </button>
                         ))}
                     </div>
                 ))}
+                {commits.length === 0 && !loading && (
+                    <div className="commit-list__empty">No commits yet</div>
+                )}
             </div>
         </div>
     );
