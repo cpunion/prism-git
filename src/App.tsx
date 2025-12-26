@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useNavigate, useSearchParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import {
@@ -67,7 +67,6 @@ function RepositoryWindow() {
 
 // 主窗口监听器
 function AppWithListener() {
-    const navigate = useNavigate();
     const [dialogState, setDialogState] = useState<{
         type: 'init' | 'addToList' | null;
         path: string;

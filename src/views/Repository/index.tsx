@@ -38,7 +38,7 @@ export function Repository({ path, name }: RepositoryProps) {
     const [commits, setCommits] = useState<CommitInfo[]>([]);
     const [stagedFiles, setStagedFiles] = useState<FileInfo[]>([]);
     const [unstagedFiles, setUnstagedFiles] = useState<FileInfo[]>([]);
-    const [currentBranch, setCurrentBranch] = useState('main');
+    const [currentBranch] = useState('main');
 
     useEffect(() => {
         if (repoPath) {
