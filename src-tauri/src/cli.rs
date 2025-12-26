@@ -11,11 +11,13 @@ pub struct Cli {
 }
 
 impl Cli {
+    #[allow(dead_code)]
     pub fn parse_args() -> Self {
         Self::parse()
     }
 
     /// Get the resolved repository path
+    #[allow(dead_code)]
     pub fn get_repo_path(&self) -> Option<PathBuf> {
         self.path.as_ref().map(|p| {
             let path = PathBuf::from(p);

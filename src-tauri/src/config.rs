@@ -87,6 +87,7 @@ impl AppConfig {
     }
 
     /// Update last opened time for a repository
+    #[allow(dead_code)]
     pub fn update_last_opened(&mut self, id: &str) {
         if let Some(repo) = self.repositories.iter_mut().find(|r| r.id == id) {
             repo.last_opened_at = Some(Utc::now());
