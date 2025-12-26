@@ -6,12 +6,16 @@
 //! 3. If not running: starts prism-gui in background and exits
 
 use std::env;
-use std::io::{Read, Write};
-use std::os::unix::net::UnixStream;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
-/// Get the socket path for IPC
+#[cfg(unix)]
+use std::io::{Read, Write};
+#[cfg(unix)]
+use std::os::unix::net::UnixStream;
+
+/// Get the socket path for IPC (Unix only)
+#[cfg(unix)]
 fn get_socket_path() -> PathBuf {
     dirs::runtime_dir()
         .or_else(|| dirs::cache_dir())
@@ -51,7 +55,8 @@ fn resolve_path(path: &str) -> Option<PathBuf> {
     resolved.canonicalize().ok()
 }
 
-/// Try to send path to running instance
+/// Try to send path to running instance (Unix only)
+#[cfg(unix)]
 fn send_to_running_instance(message: &str) -> Result<(), String> {
     let socket_path = get_socket_path();
 
@@ -79,14 +84,21 @@ fn send_to_running_instance(message: &str) -> Result<(), String> {
     }
 }
 
+/// Windows: always return error to start new instance
+#[cfg(not(unix))]
+fn send_to_running_instance(_message: &str) -> Result<(), String> {
+    Err("IPC not supported on Windows".to_string())
+}
+
 /// Start the GUI process in background
 fn start_gui(path: Option<&str>, is_git: bool) -> Result<(), String> {
     let current_exe = env::current_exe()
         .map_err(|e| format!("Cannot get current exe: {}", e))?;
 
+    let gui_name = if cfg!(windows) { "prism-gui.exe" } else { "prism-gui" };
     let gui_path = current_exe.parent()
         .ok_or("Cannot get exe directory")?
-        .join("prism-gui");
+        .join(gui_name);
 
     if !gui_path.exists() {
         return Err(format!("GUI binary not found: {}", gui_path.display()));

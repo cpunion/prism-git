@@ -9,12 +9,17 @@ mod models;
 use cli::find_git_root;
 use config::{AppConfig, RepositoryConfig};
 use models::*;
-use std::io::{BufRead, BufReader, Write};
-use std::os::unix::net::{UnixListener, UnixStream};
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
-use std::thread;
 use tauri::{AppHandle, Emitter, Manager, State};
+
+// Unix-only imports for IPC
+#[cfg(unix)]
+use std::io::{BufRead, BufReader, Write};
+#[cfg(unix)]
+use std::os::unix::net::{UnixListener, UnixStream};
+#[cfg(unix)]
+use std::thread;
 
 // Application state
 struct AppState {
@@ -22,7 +27,8 @@ struct AppState {
     initial_repo_path: Mutex<Option<String>>,
 }
 
-/// Get the socket path for IPC
+/// Get the socket path for IPC (Unix only)
+#[cfg(unix)]
 fn get_socket_path() -> PathBuf {
     dirs::runtime_dir()
         .or_else(|| dirs::cache_dir())
@@ -30,7 +36,8 @@ fn get_socket_path() -> PathBuf {
         .join("prism.sock")
 }
 
-/// Handle incoming connection from CLI
+/// Handle incoming connection from CLI (Unix only)
+#[cfg(unix)]
 fn handle_client(mut stream: UnixStream, app: AppHandle) {
     let cloned_stream = match stream.try_clone() {
         Ok(s) => s,
@@ -73,7 +80,8 @@ fn handle_client(mut stream: UnixStream, app: AppHandle) {
     }
 }
 
-/// Start IPC server to listen for CLI connections
+/// Start IPC server to listen for CLI connections (Unix only)
+#[cfg(unix)]
 fn start_ipc_server(app: AppHandle) {
     let socket_path = get_socket_path();
 
@@ -90,7 +98,6 @@ fn start_ipc_server(app: AppHandle) {
     };
 
     // Set socket permissions
-    #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         let _ = std::fs::set_permissions(&socket_path, std::fs::Permissions::from_mode(0o600));
@@ -107,6 +114,13 @@ fn start_ipc_server(app: AppHandle) {
             }
         }
     });
+}
+
+/// No-op IPC server for Windows
+#[cfg(not(unix))]
+fn start_ipc_server(_app: AppHandle) {
+    // IPC via Unix sockets is not supported on Windows
+    // TODO: Implement named pipes for Windows IPC
 }
 
 // Tauri 命令：打开仓库
