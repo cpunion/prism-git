@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, useSearchParams, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { listen } from '@tauri-apps/api/event';
+import { listen, emit } from '@tauri-apps/api/event';
 import {
   getInitialRepoPath,
   initRepository,
@@ -122,6 +122,8 @@ function MainWindowContent() {
     try {
       const name = path.split('/').pop() || 'Repository';
       await addRepository(path, name);
+      // Notify RepositoryList to refresh
+      await emit('repo-list-refresh');
     } catch (error) {
       console.error('Failed to add repository:', error);
     }
