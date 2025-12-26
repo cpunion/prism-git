@@ -117,6 +117,15 @@
     background: white;
 }
 
+.commit-item__dot--dirty {
+    background: var(--color-warning, #FFA500);
+}
+
+.commit-item--selected .commit-item__dot--dirty {
+    background: white;
+    border: 2px solid var(--color-warning, #FFA500);
+}
+
 .commit-item__info {
     flex: 1;
     min-width: 0;

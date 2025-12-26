@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ResizablePanel } from '../../../components/common/ResizablePanel';
 import { FileStatusBadge } from '../../../components/git/FileStatusBadge';
-import { getStatus, stageFile, unstageFile } from '../../../api';
+import { getStatus, getCommitChanges, stageFile, unstageFile } from '../../../api';
 import './FileList.css';
 
 interface FileInfo {
@@ -12,6 +12,8 @@ interface FileInfo {
 
 interface FileListProps {
     repoPath: string;
+    mode: 'working-copy' | 'commit-details';
+    commitId?: string; // Required if mode is 'commit-details'
     stagedHeight: number;
     onStagedHeightChange: (height: number) => void;
     selectedFile: string | null;
@@ -20,6 +22,8 @@ interface FileListProps {
 
 export function FileList({
     repoPath,
+    mode,
+    commitId,
     stagedHeight,
     onStagedHeightChange,
     selectedFile,
@@ -27,46 +31,51 @@ export function FileList({
 }: FileListProps) {
     const [stagedFiles, setStagedFiles] = useState<FileInfo[]>([]);
     const [unstagedFiles, setUnstagedFiles] = useState<FileInfo[]>([]);
+    const [commitFiles, setCommitFiles] = useState<FileInfo[]>([]);
     const [loading, setLoading] = useState(false);
 
-    // Fetch file status
-    const loadStatus = async () => {
+    // Fetch status or commit changes
+    const loadData = async () => {
         try {
             setLoading(true);
-            const status = await getStatus(repoPath);
-            setStagedFiles(status.staged);
-            setUnstagedFiles(status.unstaged);
+            if (mode === 'working-copy') {
+                const status = await getStatus(repoPath);
+                setStagedFiles(status.staged);
+                setUnstagedFiles(status.unstaged);
+            } else if (mode === 'commit-details' && commitId) {
+                // Load files for specific commit
+                const files = await getCommitChanges(repoPath, commitId);
+                setCommitFiles(files);
+            }
         } catch (error) {
-            console.error('Failed to load status:', error);
+            console.error('Failed to load file data:', error);
         } finally {
             setLoading(false);
         }
     };
 
-    // Load status on mount and when repo changes
     useEffect(() => {
-        loadStatus();
-    }, [repoPath]);
+        loadData();
+    }, [repoPath, mode, commitId]);
 
-    // Handle stage file
+    // Handle stage/unstage (only for working copy)
     const handleStageFile = async (path: string) => {
+        if (mode !== 'working-copy') return;
         try {
             await stageFile(repoPath, path);
-            await loadStatus(); // Reload after staging
+            await loadData();
         } catch (error) {
-            console.error('Failed to stage file:', error);
-            alert(`Failed to stage file: ${error}`);
+            console.error('Failed to stage:', error);
         }
     };
 
-    // Handle unstage file
     const handleUnstageFile = async (path: string) => {
+        if (mode !== 'working-copy') return;
         try {
             await unstageFile(repoPath, path);
-            await loadStatus(); // Reload after unstaging
+            await loadData();
         } catch (error) {
-            console.error('Failed to unstage file:', error);
-            alert(`Failed to unstage file: ${error}`);
+            console.error('Failed to unstage:', error);
         }
     };
 
@@ -78,6 +87,33 @@ export function FileList({
         );
     }
 
+    // Render for Commit Details (Read-only single list)
+    if (mode === 'commit-details') {
+        return (
+            <div className="file-list">
+                <div className="file-list__header">
+                    <span className="file-list__title">Changed Files ({commitFiles.length})</span>
+                </div>
+                <div className="file-list__items">
+                    {commitFiles.map((file) => (
+                        <button
+                            key={file.path}
+                            className={`file-item ${selectedFile === file.path ? 'file-item--selected' : ''}`}
+                            onClick={() => onSelectFile(file.path)}
+                        >
+                            <FileStatusBadge status={file.status_code} />
+                            <span className="file-item__path">{file.path}</span>
+                        </button>
+                    ))}
+                    {commitFiles.length === 0 && (
+                        <div className="file-list__empty">No changed files found</div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    // Render for Working Copy (Staged/Unstaged split view)
     return (
         <div className="file-list">
             <ResizablePanel
@@ -91,13 +127,6 @@ export function FileList({
                     <div className="file-list__section">
                         <div className="file-list__header">
                             <span className="file-list__title">✓ Staged ({stagedFiles.length})</span>
-                            <button
-                                className="file-list__action"
-                                title="Unstage All"
-                                disabled={stagedFiles.length === 0}
-                            >
-                                −
-                            </button>
                         </div>
                         <div className="file-list__items">
                             {stagedFiles.map((file) => (
@@ -115,9 +144,6 @@ export function FileList({
                                     />
                                     <FileStatusBadge status={file.status_code} />
                                     <span className="file-item__path">{file.path}</span>
-                                    <button className="file-item__menu" onClick={(e) => e.stopPropagation()}>
-                                        ⋮
-                                    </button>
                                 </button>
                             ))}
                             {stagedFiles.length === 0 && (
@@ -130,13 +156,6 @@ export function FileList({
                     <div className="file-list__section">
                         <div className="file-list__header">
                             <span className="file-list__title">○ Unstaged ({unstagedFiles.length})</span>
-                            <button
-                                className="file-list__action"
-                                title="Stage All"
-                                disabled={unstagedFiles.length === 0}
-                            >
-                                +
-                            </button>
                         </div>
                         <div className="file-list__items">
                             {unstagedFiles.map((file) => (
@@ -154,9 +173,6 @@ export function FileList({
                                     />
                                     <FileStatusBadge status={file.status_code} />
                                     <span className="file-item__path">{file.path}</span>
-                                    <button className="file-item__menu" onClick={(e) => e.stopPropagation()}>
-                                        ⋮
-                                    </button>
                                 </button>
                             ))}
                             {unstagedFiles.length === 0 && (

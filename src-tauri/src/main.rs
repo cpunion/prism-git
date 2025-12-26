@@ -254,6 +254,26 @@ async fn commit_changes(repo_path: String, message: String) -> Result<String, St
         .map_err(|e| format!("Task error: {}", e))?
 }
 
+// Tauri 命令：获取提交的文件变更
+#[tauri::command]
+async fn get_commit_changes(repo_path: String, commit_id: String) -> Result<Vec<FileInfo>, String> {
+    tokio::task::spawn_blocking(move || git_ops::get_commit_changes(&repo_path, &commit_id))
+        .await
+        .map_err(|e| format!("Task error: {}", e))?
+}
+
+// Tauri 命令：获取提交的文件 Diff
+#[tauri::command]
+async fn get_commit_file_diff(
+    repo_path: String,
+    commit_id: String,
+    file_path: String
+) -> Result<DiffResponse, String> {
+    tokio::task::spawn_blocking(move || git_ops::get_commit_file_diff(&repo_path, &commit_id, &file_path))
+        .await
+        .map_err(|e| format!("Task error: {}", e))?
+}
+
 
 fn main() {
     // Parse CLI arguments (for direct launch with path)
@@ -302,6 +322,8 @@ fn main() {
             stage_file,
             unstage_file,
             commit_changes,
+            get_commit_changes,
+            get_commit_file_diff,
         ])
         .run(tauri::generate_context!())
         .expect("Error running Tauri application");

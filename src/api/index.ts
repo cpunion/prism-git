@@ -108,3 +108,11 @@ export async function unstageFile(repoPath: string, filePath: string): Promise<v
 export async function commitChanges(repoPath: string, message: string): Promise<string> {
   return invoke<string>('commit_changes', { repo_path: repoPath, message });
 }
+
+export async function getCommitChanges(repoPath: string, commitId: string): Promise<FileInfo[]> {
+  return invoke<FileInfo[]>('get_commit_changes', { repo_path: repoPath, commit_id: commitId });
+}
+
+export async function getCommitFileDiff(repoPath: string, commitId: string, filePath: string): Promise<DiffResponse> {
+  return invoke<DiffResponse>('get_commit_file_diff', { repo_path: repoPath, commit_id: commitId, file_path: filePath });
+}

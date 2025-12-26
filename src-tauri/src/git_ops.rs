@@ -324,3 +324,118 @@ pub fn commit_changes(repo_path: &str, message: &str) -> Result<String, String> 
 
     Ok(commit_id.to_string())
 }
+
+/// Get files changed in a specific commit
+pub fn get_commit_changes(repo_path: &str, commit_id: &str) -> Result<Vec<FileInfo>, String> {
+    let repo = Repository::open(repo_path)
+        .map_err(|e| format!("无法打开仓库: {}", e))?;
+
+    let commit = repo.find_commit(git2::Oid::from_str(commit_id).map_err(|e| e.to_string())?)
+        .map_err(|e| format!("无法找到提交: {}", e))?;
+
+    let commit_tree = commit.tree()
+        .map_err(|e| format!("无法获取提交树: {}", e))?;
+
+    let parent_tree = if commit.parent_count() > 0 {
+        let parent = commit.parent(0)
+            .map_err(|e| format!("无法获取父提交: {}", e))?;
+        Some(parent.tree().map_err(|e| format!("无法获取父提交树: {}", e))?)
+    } else {
+        None
+    };
+
+    let diff = repo.diff_tree_to_tree(parent_tree.as_ref(), Some(&commit_tree), None)
+        .map_err(|e| format!("创建 diff 失败: {}", e))?;
+
+    let mut files = Vec::new();
+
+    diff.print(git2::DiffFormat::NameStatus, |_delta, _hunk, line| {
+        let content = String::from_utf8_lossy(line.content()).trim().to_string();
+        // content format: "M\tfile_path" or "A\tfile_path"
+        if let Some((status_char, path)) = content.split_once('\t') {
+             let status_code = status_char.to_string();
+             let status = match status_char {
+                 "M" => "Modified",
+                 "A" => "Added",
+                 "D" => "Deleted",
+                 "R" => "Renamed",
+                 _ => "Unknown",
+             };
+
+             files.push(FileInfo {
+                 path: path.to_string(),
+                 status: status.to_string(),
+                 status_code,
+             });
+        }
+        true
+    }).map_err(|e| format!("处理 diff 失败: {}", e))?;
+
+    Ok(files)
+}
+
+/// Get diff for a specific file in a commit
+pub fn get_commit_file_diff(repo_path: &str, commit_id: &str, file_path: &str) -> Result<DiffResponse, String> {
+    let repo = Repository::open(repo_path)
+        .map_err(|e| format!("无法打开仓库: {}", e))?;
+
+    let commit = repo.find_commit(git2::Oid::from_str(commit_id).map_err(|e| e.to_string())?)
+        .map_err(|e| format!("无法找到提交: {}", e))?;
+
+    let commit_tree = commit.tree()
+        .map_err(|e| format!("无法获取提交树: {}", e))?;
+
+    let parent_tree = if commit.parent_count() > 0 {
+        let parent = commit.parent(0)
+            .map_err(|e| format!("无法获取父提交: {}", e))?;
+        Some(parent.tree().map_err(|e| format!("无法获取父提交树: {}", e))?)
+    } else {
+        None
+    };
+
+    let mut diff_opts = git2::DiffOptions::new();
+    diff_opts.pathspec(file_path);
+
+    let diff = repo.diff_tree_to_tree(parent_tree.as_ref(), Some(&commit_tree), Some(&mut diff_opts))
+        .map_err(|e| format!("创建 diff 失败: {}", e))?;
+
+    let mut hunks = Vec::new();
+
+    diff.print(git2::DiffFormat::Patch, |_delta, hunk, line| {
+        if let Some(hunk) = hunk {
+            let diff_hunk = DiffHunk {
+                old_start: hunk.old_start(),
+                old_lines: hunk.old_lines(),
+                new_start: hunk.new_start(),
+                new_lines: hunk.new_lines(),
+                lines: Vec::new(),
+            };
+            hunks.push(diff_hunk);
+        }
+
+        if !hunks.is_empty() {
+            let line_type = match line.origin() {
+                '+' => "add",
+                '-' => "delete",
+                _ => "context",
+            };
+
+            let diff_line = DiffLine {
+                line_type: line_type.to_string(),
+                content: String::from_utf8_lossy(line.content()).to_string(),
+                old_lineno: line.old_lineno(),
+                new_lineno: line.new_lineno(),
+            };
+
+            if let Some(last_hunk) = hunks.last_mut() {
+                last_hunk.lines.push(diff_line);
+            }
+        }
+        true
+    }).map_err(|e| format!("打印 diff 失败: {}", e))?;
+
+    Ok(DiffResponse {
+        file_path: file_path.to_string(),
+        hunks,
+    })
+}

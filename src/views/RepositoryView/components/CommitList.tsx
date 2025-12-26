@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getCommits } from '../../../api';
+import { getCommits, getStatus } from '../../../api';
 import './CommitList.css';
 
 interface CommitInfo {
@@ -19,14 +19,19 @@ interface CommitListProps {
 
 export function CommitList({ repoPath, selectedCommit, onSelectCommit }: CommitListProps) {
     const [commits, setCommits] = useState<CommitInfo[]>([]);
+    const [hasUncommittedChanges, setHasUncommittedChanges] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    // Fetch commits
-    const loadCommits = async () => {
+    // Fetch commits and status
+    const loadData = async () => {
         try {
             setLoading(true);
-            const data = await getCommits(repoPath, 50, 0);
-            setCommits(data);
+            const [commitsData, statusData] = await Promise.all([
+                getCommits(repoPath, 50, 0),
+                getStatus(repoPath)
+            ]);
+            setCommits(commitsData);
+            setHasUncommittedChanges(statusData.staged.length > 0 || statusData.unstaged.length > 0);
         } catch (error) {
             console.error('Failed to load commits:', error);
         } finally {
@@ -35,7 +40,7 @@ export function CommitList({ repoPath, selectedCommit, onSelectCommit }: CommitL
     };
 
     useEffect(() => {
-        loadCommits();
+        loadData();
     }, [repoPath]);
 
     const formatDate = (timestamp: number) => {
@@ -63,7 +68,7 @@ export function CommitList({ repoPath, selectedCommit, onSelectCommit }: CommitL
     if (loading) {
         return (
             <div className="commit-list">
-                <div className="commit-list__loading">Loading commits...</div>
+                <div className="commit-list__loading">Loading...</div>
             </div>
         );
     }
@@ -74,11 +79,32 @@ export function CommitList({ repoPath, selectedCommit, onSelectCommit }: CommitL
                 <span className="commit-list__title">Commits</span>
                 <div className="commit-list__filters">
                     <button className="commit-list__filter-btn">All Branches ▾</button>
-                    <input type="text" className="commit-list__search" placeholder="Search commits..." />
                 </div>
             </div>
 
             <div className="commit-list__content">
+                {/* Uncommitted Changes Row */}
+                {hasUncommittedChanges && (
+                    <div className="commit-group">
+                        <div className="commit-group__header">Changes</div>
+                        <button
+                            className={`commit-item ${selectedCommit === 'WORKING_COPY' ? 'commit-item--selected' : ''}`}
+                            onClick={() => onSelectCommit('WORKING_COPY')}
+                        >
+                            <div className="commit-item__graph">
+                                <span className="commit-item__dot commit-item__dot--dirty" />
+                            </div>
+                            <div className="commit-item__info">
+                                <div className="commit-item__message">Uncommitted Changes</div>
+                                <div className="commit-item__meta">
+                                    <span className="commit-item__hash">*</span>
+                                    <span className="commit-item__author">You</span>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                )}
+
                 {Object.entries(groupedCommits).map(([date, dateCommits]) => (
                     <div key={date} className="commit-group">
                         <div className="commit-group__header">{date}</div>
@@ -102,7 +128,7 @@ export function CommitList({ repoPath, selectedCommit, onSelectCommit }: CommitL
                         ))}
                     </div>
                 ))}
-                {commits.length === 0 && !loading && (
+                {commits.length === 0 && !hasUncommittedChanges && !loading && (
                     <div className="commit-list__empty">No commits yet</div>
                 )}
             </div>

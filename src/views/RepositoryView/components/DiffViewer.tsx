@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getDiff } from '../../../api';
+import { getDiff, getCommitFileDiff } from '../../../api';
 import './DiffViewer.css';
 
 interface DiffLine {
@@ -11,16 +11,17 @@ interface DiffLine {
 
 interface DiffViewerProps {
     repoPath: string;
+    commitId?: string; // If present, view diff for specific commit
     filePath: string | null;
     viewMode: 'split' | 'unified';
     onViewModeChange: (mode: 'split' | 'unified') => void;
 }
 
-export function DiffViewer({ repoPath, filePath, viewMode, onViewModeChange }: DiffViewerProps) {
+export function DiffViewer({ repoPath, commitId, filePath, viewMode, onViewModeChange }: DiffViewerProps) {
     const [diffLines, setDiffLines] = useState<DiffLine[]>([]);
     const [loading, setLoading] = useState(false);
 
-    // Fetch diff when file changes
+    // Fetch diff when file or commit changes
     useEffect(() => {
         if (!filePath) {
             setDiffLines([]);
@@ -30,7 +31,12 @@ export function DiffViewer({ repoPath, filePath, viewMode, onViewModeChange }: D
         const loadDiff = async () => {
             try {
                 setLoading(true);
-                const diff = await getDiff(repoPath, filePath);
+                let diff;
+                if (commitId) {
+                    diff = await getCommitFileDiff(repoPath, commitId, filePath);
+                } else {
+                    diff = await getDiff(repoPath, filePath);
+                }
 
                 // Flatten hunks into lines
                 const lines: DiffLine[] = [];
@@ -47,7 +53,7 @@ export function DiffViewer({ repoPath, filePath, viewMode, onViewModeChange }: D
         };
 
         loadDiff();
-    }, [repoPath, filePath]);
+    }, [repoPath, filePath, commitId]);
 
     if (!filePath) {
         return (
