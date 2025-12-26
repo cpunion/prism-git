@@ -22,7 +22,7 @@ export function FileList({
     repoPath,
     stagedHeight,
     onStagedHeightChange,
-    selected File,
+    selectedFile,
     onSelectFile,
 }: FileListProps) {
     const [stagedFiles, setStagedFiles] = useState<FileInfo[]>([]);
