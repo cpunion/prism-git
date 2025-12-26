@@ -1,0 +1,74 @@
+.repo-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 48px;
+    padding: 0 12px;
+    background: var(--bg-secondary, #f6f8fa);
+    border-bottom: 1px solid var(--color-border, #e1e4e8);
+    -webkit-app-region: drag;
+}
+
+.repo-toolbar__left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    -webkit-app-region: no-drag;
+}
+
+.repo-toolbar__close {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-secondary, #586069);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+
+.repo-toolbar__close:hover {
+    background: var(--bg-hover, #e1e4e8);
+}
+
+.repo-toolbar__name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-primary, #24292e);
+}
+
+.repo-toolbar__actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    -webkit-app-region: no-drag;
+}
+
+.repo-toolbar__right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    -webkit-app-region: no-drag;
+}
+
+.repo-toolbar__icon-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+
+.repo-toolbar__icon-btn:hover {
+    background: var(--bg-hover, #e1e4e8);
+}

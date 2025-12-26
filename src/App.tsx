@@ -10,7 +10,7 @@ import {
 } from './api';
 import { openRepoWindow } from './api/window';
 import { RepositoryList } from './views/RepositoryList';
-import { Repository } from './views/Repository';
+import { RepositoryView } from './views/RepositoryView';
 import './styles/global.css';
 
 interface PathInfo {
@@ -85,7 +85,7 @@ function RepositoryWindow() {
 
   return (
     <>
-      <Repository path={path} name={name} />
+      <RepositoryView path={path} name={name} />
 
       {/* Add to list dialog - shown in repo window */}
       {showDialog && (
@@ -234,7 +234,7 @@ function AppRouter() {
   return (
     <Routes>
       <Route path="/" element={<MainWindowContent />} />
-      <Route path="/repo/:id" element={<Repository />} />
+      <Route path="/repo/:id" element={<RepositoryView path="" name="" />} />
     </Routes>
   );
 }
