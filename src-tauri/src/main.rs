@@ -32,7 +32,14 @@ fn get_socket_path() -> PathBuf {
 
 /// Handle incoming connection from CLI
 fn handle_client(mut stream: UnixStream, app: AppHandle) {
-    let reader = BufReader::new(stream.try_clone().unwrap());
+    let cloned_stream = match stream.try_clone() {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("Failed to clone stream: {}", e);
+            return;
+        }
+    };
+    let reader = BufReader::new(cloned_stream);
 
     for line in reader.lines() {
         if let Ok(message) = line {
