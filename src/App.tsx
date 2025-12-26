@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useSearchParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useSearchParams, useLocation } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import {
@@ -63,8 +63,8 @@ function RepositoryWindow() {
   return <Repository path={path} name={name} />;
 }
 
-// 主窗口监听器
-function AppWithListener() {
+// 主窗口内容 - 只在 main 窗口运行
+function MainWindowContent() {
   const [dialogState, setDialogState] = useState<{
     type: 'init' | 'addToList' | null;
     path: string;
@@ -162,11 +162,7 @@ function AppWithListener() {
 
   return (
     <>
-      <Routes>
-        <Route path="/" element={<RepositoryList />} />
-        <Route path="/repo/window" element={<RepositoryWindow />} />
-        <Route path="/repo/:id" element={<Repository />} />
-      </Routes>
+      <RepositoryList />
 
       {/* 初始化仓库对话框 */}
       {dialogState.type === 'init' && (
@@ -210,10 +206,28 @@ function AppWithListener() {
   );
 }
 
+// 根据路由选择内容
+function AppRouter() {
+  const location = useLocation();
+
+  // 仓库窗口路由
+  if (location.pathname.startsWith('/repo/window')) {
+    return <RepositoryWindow />;
+  }
+
+  // 其他路由都是主窗口
+  return (
+    <Routes>
+      <Route path="/" element={<MainWindowContent />} />
+      <Route path="/repo/:id" element={<Repository />} />
+    </Routes>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
-      <AppWithListener />
+      <AppRouter />
     </BrowserRouter>
   );
 }
