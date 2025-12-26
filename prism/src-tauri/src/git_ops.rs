@@ -1,0 +1,227 @@
+use git2::{Repository, StatusOptions};
+use crate::models::*;
+
+/// 打开 Git 仓库
+pub fn open_repository(path: &str) -> Result<RepoInfo, String> {
+    let repo = Repository::open(path)
+        .map_err(|e| format!("无法打开仓库: {}", e))?;
+
+    let name = std::path::Path::new(path)
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("未知仓库")
+        .to_string();
+
+    let current_branch = get_current_branch(&repo)?;
+
+    Ok(RepoInfo {
+        path: path.to_string(),
+        name,
+        current_branch,
+        is_bare: repo.is_bare(),
+    })
+}
+
+/// 获取当前分支名称
+fn get_current_branch(repo: &Repository) -> Result<String, String> {
+    let head = repo.head()
+        .map_err(|e| format!("无法获取 HEAD: {}", e))?;
+
+    if let Some(name) = head.shorthand() {
+        Ok(name.to_string())
+    } else {
+        Ok("HEAD".to_string())
+    }
+}
+
+/// 获取提交历史
+pub fn get_commit_history(
+    path: &str,
+    limit: usize,
+    offset: usize,
+) -> Result<Vec<CommitInfo>, String> {
+    let repo = Repository::open(path)
+        .map_err(|e| format!("无法打开仓库: {}", e))?;
+
+    let mut revwalk = repo.revwalk()
+        .map_err(|e| format!("无法创建 revwalk: {}", e))?;
+
+    revwalk.set_sorting(git2::Sort::TIME | git2::Sort::TOPOLOGICAL)
+        .map_err(|e| format!("设置排序失败: {}", e))?;
+
+    revwalk.push_head()
+        .map_err(|e| format!("无法推送 HEAD: {}", e))?;
+
+    let commits: Vec<CommitInfo> = revwalk
+        .skip(offset)
+        .take(limit)
+        .filter_map(|oid_result| {
+            let oid = oid_result.ok()?;
+            let commit = repo.find_commit(oid).ok()?;
+
+            let parent_ids: Vec<String> = commit.parent_ids()
+                .map(|id| id.to_string())
+                .collect();
+
+            // 提前提取所有需要的字符串，避免生命周期问题
+            let id = commit.id().to_string();
+            let short_id = id[..7].to_string();
+            let message = commit.message().unwrap_or("").to_string();
+            let author = commit.author();
+            let author_name = author.name().unwrap_or("").to_string();
+            let author_email = author.email().unwrap_or("").to_string();
+            let timestamp = commit.time().seconds();
+
+            Some(CommitInfo {
+                id,
+                short_id,
+                message,
+                author_name,
+                author_email,
+                timestamp,
+                parent_ids,
+            })
+        })
+        .collect();
+
+    Ok(commits)
+}
+
+/// 获取文件状态
+pub fn get_file_status(path: &str) -> Result<FileStatusResponse, String> {
+    let repo = Repository::open(path)
+        .map_err(|e| format!("无法打开仓库: {}", e))?;
+
+    let mut opts = StatusOptions::new();
+    opts.include_untracked(true);
+
+    let statuses = repo.statuses(Some(&mut opts))
+        .map_err(|e| format!("获取状态失败: {}", e))?;
+
+    let mut unstaged = Vec::new();
+    let mut staged = Vec::new();
+
+    for entry in statuses.iter() {
+        let file_path = entry.path().unwrap_or("").to_string();
+        let status = entry.status();
+
+        let status_str = format_status(status);
+        let status_code = format_status_code(status);
+
+        let file_info = FileInfo {
+            path: file_path.clone(),
+            status: status_str.clone(),
+            status_code: status_code.clone(),
+        };
+
+        // 已暂存的文件
+        if status.intersects(
+            git2::Status::INDEX_NEW
+            | git2::Status::INDEX_MODIFIED
+            | git2::Status::INDEX_DELETED
+        ) {
+            staged.push(file_info.clone());
+        }
+
+        // 未暂存的文件
+        if status.intersects(
+            git2::Status::WT_NEW
+            | git2::Status::WT_MODIFIED
+            | git2::Status::WT_DELETED
+        ) {
+            unstaged.push(file_info);
+        }
+    }
+
+    Ok(FileStatusResponse { unstaged, staged })
+}
+
+/// 格式化 Git 状态为可读文本
+fn format_status(status: git2::Status) -> String {
+    if status.contains(git2::Status::WT_NEW) || status.contains(git2::Status::INDEX_NEW) {
+        "新建".to_string()
+    } else if status.contains(git2::Status::WT_MODIFIED) || status.contains(git2::Status::INDEX_MODIFIED) {
+        "修改".to_string()
+    } else if status.contains(git2::Status::WT_DELETED) || status.contains(git2::Status::INDEX_DELETED) {
+        "删除".to_string()
+    } else if status.contains(git2::Status::WT_RENAMED) || status.contains(git2::Status::INDEX_RENAMED) {
+        "重命名".to_string()
+    } else {
+        "未知".to_string()
+    }
+}
+
+/// 格式化状态代码
+fn format_status_code(status: git2::Status) -> String {
+    if status.contains(git2::Status::WT_NEW) || status.contains(git2::Status::INDEX_NEW) {
+        "A".to_string()
+    } else if status.contains(git2::Status::WT_MODIFIED) || status.contains(git2::Status::INDEX_MODIFIED) {
+        "M".to_string()
+    } else if status.contains(git2::Status::WT_DELETED) || status.contains(git2::Status::INDEX_DELETED) {
+        "D".to_string()
+    } else if status.contains(git2::Status::WT_RENAMED) || status.contains(git2::Status::INDEX_RENAMED) {
+        "R".to_string()
+    } else {
+        "?".to_string()
+    }
+}
+
+/// 获取文件的 diff
+pub fn get_file_diff(path: &str, file_path: &str) -> Result<DiffResponse, String> {
+    let repo = Repository::open(path)
+        .map_err(|e| format!("无法打开仓库: {}", e))?;
+
+    let head = repo.head()
+        .map_err(|e| format!("无法获取 HEAD: {}", e))?;
+
+    let tree = head.peel_to_tree()
+        .map_err(|e| format!("无法获取树: {}", e))?;
+
+    let mut diff_opts = git2::DiffOptions::new();
+    diff_opts.pathspec(file_path);
+
+    let diff = repo.diff_tree_to_workdir(Some(&tree), Some(&mut diff_opts))
+        .map_err(|e| format!("创建 diff 失败: {}", e))?;
+
+    let mut hunks = Vec::new();
+
+    diff.print(git2::DiffFormat::Patch, |_delta, hunk, line| {
+        if let Some(hunk) = hunk {
+            // 创建新的 hunk
+            let diff_hunk = DiffHunk {
+                old_start: hunk.old_start(),
+                old_lines: hunk.old_lines(),
+                new_start: hunk.new_start(),
+                new_lines: hunk.new_lines(),
+                lines: Vec::new(),
+            };
+            hunks.push(diff_hunk);
+        }
+
+        if !hunks.is_empty() {
+            let line_type = match line.origin() {
+                '+' => "add",
+                '-' => "delete",
+                _ => "context",
+            };
+
+            let diff_line = DiffLine {
+                line_type: line_type.to_string(),
+                content: String::from_utf8_lossy(line.content()).to_string(),
+                old_lineno: line.old_lineno(),
+                new_lineno: line.new_lineno(),
+            };
+
+            if let Some(last_hunk) = hunks.last_mut() {
+                last_hunk.lines.push(diff_line);
+            }
+        }
+
+        true
+    }).map_err(|e| format!("打印 diff 失败: {}", e))?;
+
+    Ok(DiffResponse {
+        file_path: file_path.to_string(),
+        hunks,
+    })
+}

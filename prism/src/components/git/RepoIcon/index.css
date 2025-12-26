@@ -1,0 +1,13 @@
+.repo-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--repo-icon-bg);
+    color: var(--repo-icon-color);
+    border-radius: var(--radius-lg);
+    flex-shrink: 0;
+}
+
+.repo-icon svg {
+    display: block;
+}

@@ -1,0 +1,103 @@
+/* CSS Variables - SourceTree inspired */
+:root {
+    /* Primary Colors */
+    --primary-blue: #0052CC;
+    --header-blue: #0747A6;
+    --accent-blue: #4C9AFF;
+
+    /* Repository Icon */
+    --repo-icon-bg: #4C9AFF;
+    --repo-icon-color: #FFFFFF;
+    --repo-icon-size: 48px;
+
+    /* Branch Badge */
+    --branch-badge-bg: #DFE1E6;
+    --branch-badge-text: #42526E;
+    --branch-badge-border: #C1C7D0;
+
+    /* Sidebar */
+    --sidebar-bg: #F4F5F7;
+    --sidebar-text: #172B4D;
+    --sidebar-item-hover: #EBECF0;
+    --sidebar-item-active: #DEEBFF;
+    --sidebar-width: 220px;
+
+    /* Background */
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #FAFBFC;
+    --bg-tertiary: #F4F5F7;
+
+    /* Text */
+    --text-primary: #172B4D;
+    --text-secondary: #5E6C84;
+    --text-tertiary: #6B778C;
+
+    /* Border */
+    --border-color: #DFE1E6;
+    --border-light: #EBECF0;
+
+    /* Status Colors */
+    --status-added: #36B37E;
+    --status-modified: #FFAB00;
+    --status-deleted: #FF5630;
+    --status-renamed: #00B8D9;
+
+    /* Font */
+    --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif;
+    --font-mono: "SF Mono", Monaco, "Cascadia Code", monospace;
+
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 20px;
+    --spacing-2xl: 24px;
+
+    /* Border Radius */
+    --radius-sm: 3px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-full: 999px;
+
+    /* Shadow */
+    --shadow-sm: 0 1px 1px rgba(9, 30, 66, 0.04), 0 0 1px rgba(9, 30, 66, 0.08);
+    --shadow-md: 0 4px 8px -2px rgba(9, 30, 66, 0.15), 0 0 1px rgba(9, 30, 66, 0.2);
+    --shadow-lg: 0 8px 16px -4px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.3);
+}
+
+/* Dark Mode */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary-blue: #579DFF;
+        --header-blue: #1D7AFC;
+        --accent-blue: #85B8FF;
+
+        --repo-icon-bg: #579DFF;
+
+        --branch-badge-bg: #44546F;
+        --branch-badge-text: #B3BAC5;
+        --branch-badge-border: #626F86;
+
+        --sidebar-bg: #1D2125;
+        --sidebar-text: #B6C2CF;
+        --sidebar-item-hover: #2C333A;
+        --sidebar-item-active: #09326C;
+
+        --bg-primary: #161A1D;
+        --bg-secondary: #1D2125;
+        --bg-tertiary: #22272B;
+
+        --text-primary: #B6C2CF;
+        --text-secondary: #9FADBC;
+        --text-tertiary: #8C9BAB;
+
+        --border-color: #2C333A;
+        --border-light: #38414A;
+
+        --status-added: #4BCE97;
+        --status-modified: #E2B203;
+        --status-deleted: #F87462;
+        --status-renamed: #6CC3E0;
+    }
+}

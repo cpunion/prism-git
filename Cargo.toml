@@ -1,0 +1,12 @@
+[workspace]
+resolver = "2"
+members = [
+    "demo/egui-demo",
+    "demo/iced-demo",
+    "demo/slint-demo",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["CPUnion"]

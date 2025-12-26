@@ -1,0 +1,376 @@
+/* macOS 风格 Git 客户端样式 */
+
+:root {
+    /* macOS 颜色系统 */
+    --system-blue: #007AFF;
+    --system-blue-dark: #0051D5;
+    --system-gray-1: #8E8E93;
+    --system-gray-2: #AEAEB2;
+    --system-gray-3: #C7C7CC;
+    --system-gray-4: #D1D1D6;
+    --system-gray-5: #E5E5EA;
+    --system-gray-6: #F2F2F7;
+
+    --background: #FFFFFF;
+    --sidebar-bg: rgba(246, 246, 246, 0.95);
+    --border-color: #E5E5E5;
+    --text-primary: #000000;
+    --text-secondary: #6E6E73;
+
+    /* macOS 字体 */
+    --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif;
+
+    /* 间距 */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 12px;
+    --spacing-lg: 16px;
+    --spacing-xl: 24px;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: var(--background);
+    color: var(--text-primary);
+}
+
+.git-client {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* 工具栏 */
+.toolbar {
+    height: 52px;
+    background: var(--sidebar-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0 var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+
+.toolbar-left {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+}
+
+.repo-path-input {
+    width: 400px;
+    padding: 6px 12px;
+    border: 1px solid var(--system-gray-4);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: var(--font-family);
+}
+
+.repo-path-input:focus {
+    outline: none;
+    border-color: var(--system-blue);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+}
+
+.btn-primary {
+    background: var(--system-blue);
+    color: white;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background: var(--system-blue-dark);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+.repo-info {
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: center;
+}
+
+.repo-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.branch-badge {
+    background: var(--system-gray-5);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* 主容器 */
+.main-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* 侧边栏 */
+.sidebar {
+    width: 220px;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+.sidebar-section {
+    padding: var(--spacing-lg) var(--spacing-md);
+}
+
+.section-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--system-gray-1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--spacing-sm);
+    padding-left: var(--spacing-sm);
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: 6px var(--spacing-sm);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.15s;
+    margin-bottom: 2px;
+    user-select: none;
+}
+
+.sidebar-item:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-item.active {
+    background: var(--system-blue);
+    color: white;
+}
+
+.sidebar-item .icon {
+    font-size: 16px;
+}
+
+.sidebar-item .badge {
+    margin-left: auto;
+    background: var(--system-gray-4);
+    color: var(--text-secondary);
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.sidebar-item.active .badge {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+/* 内容区 */
+.content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-xl);
+    background: var(--background);
+}
+
+.empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-secondary);
+    font-size: 15px;
+}
+
+/* 文件状态面板 */
+.file-status-panel h2,
+.commit-history-panel h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: var(--spacing-xl);
+}
+
+.file-group {
+    margin-bottom: var(--spacing-xl);
+}
+
+.group-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-md);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.file-list {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--system-gray-6);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.file-item:last-child {
+    border-bottom: none;
+}
+
+.file-item:hover {
+    background: var(--system-gray-6);
+}
+
+.file-item.selected {
+    background: rgba(0, 122, 255, 0.08);
+}
+
+.status-badge {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.status-badge.status-a {
+    background: #34C759;
+    color: white;
+}
+
+.status-badge.status-m {
+    background: #FF9500;
+    color: white;
+}
+
+.status-badge.status-d {
+    background: #FF3B30;
+    color: white;
+}
+
+.file-path {
+    flex: 1;
+    font-size: 13px;
+    font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+}
+
+.file-status-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* 提交历史面板 */
+.commit-list {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.commit-item {
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--system-gray-6);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.commit-item:last-child {
+    border-bottom: none;
+}
+
+.commit-item:hover {
+    background: var(--system-gray-6);
+}
+
+.commit-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    font-size: 12px;
+}
+
+.commit-id {
+    font-family: "SF Mono", Monaco, monospace;
+    background: var(--system-gray-6);
+    padding: 3px 8px;
+    border-radius: 4px;
+    color: var(--system-blue);
+    font-weight: 600;
+}
+
+.commit-author {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.commit-date {
+    margin-left: auto;
+    color: var(--text-secondary);
+}
+
+.commit-message {
+    font-size: 14px;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
+/* macOS 风格滚动条 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--system-gray-3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--system-gray-2);
+}

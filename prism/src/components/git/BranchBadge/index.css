@@ -1,0 +1,16 @@
+.branch-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: var(--branch-badge-bg);
+    color: var(--branch-badge-text);
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.branch-badge svg {
+    flex-shrink: 0;
+}

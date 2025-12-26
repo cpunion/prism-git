@@ -1,0 +1,112 @@
+@import './variables.css';
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+/* macOS style scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-tertiary);
+}
+
+/* Selection */
+::selection {
+    background: var(--sidebar-item-active);
+    color: var(--text-primary);
+}
+
+/* Focus outline */
+:focus-visible {
+    outline: 2px solid var(--primary-blue);
+    outline-offset: 2px;
+}
+
+button:focus-visible {
+    outline-offset: -2px;
+}
+
+/* Dialog Overlay */
+.dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.dialog {
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    min-width: 400px;
+    max-width: 500px;
+}
+
+.dialog__header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.dialog__header h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.dialog__content {
+    padding: 20px;
+}
+
+.dialog__content p {
+    margin: 0 0 12px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.dialog__content p:last-child {
+    margin-bottom: 0;
+}
+
+.dialog__content strong {
+    color: var(--text-primary);
+    word-break: break-all;
+}
+
+.dialog__actions {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}

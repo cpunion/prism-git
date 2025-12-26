@@ -1,0 +1,28 @@
+.file-status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-sm);
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+}
+
+.file-status-badge--added {
+    background: var(--status-added);
+}
+
+.file-status-badge--modified {
+    background: var(--status-modified);
+}
+
+.file-status-badge--deleted {
+    background: var(--status-deleted);
+}
+
+.file-status-badge--renamed {
+    background: var(--status-renamed);
+}

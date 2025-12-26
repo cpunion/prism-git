@@ -1,0 +1,225 @@
+.repo-list {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-primary);
+}
+
+/* Header */
+.repo-list__header {
+    height: 38px;
+    background: var(--header-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-app-region: drag;
+}
+
+.repo-list__title {
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+    margin: 0;
+}
+
+/* Toolbar */
+.repo-list__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.repo-list__tabs {
+    display: flex;
+    gap: 4px;
+}
+
+.repo-list__tab {
+    padding: 6px 16px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.repo-list__tab:hover {
+    background: var(--sidebar-item-hover);
+    color: var(--text-primary);
+}
+
+.repo-list__tab.active {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+.repo-list__actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Search */
+.repo-list__search {
+    padding: 8px 12px;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.repo-list__search-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    font-size: 13px;
+    font-family: var(--font-family);
+    color: var(--text-primary);
+}
+
+.repo-list__search-input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.1);
+}
+
+.repo-list__search-input::placeholder {
+    color: var(--text-tertiary);
+}
+
+/* Content */
+.repo-list__content {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.repo-list__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-secondary);
+}
+
+.repo-list__empty p {
+    margin: 4px 0;
+}
+
+.text-secondary {
+    color: var(--text-tertiary);
+    font-size: 12px;
+}
+
+/* Items */
+.repo-list__items {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.repo-list__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-light);
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.repo-list__item:hover {
+    background: var(--sidebar-item-hover);
+}
+
+.repo-list__item:active {
+    background: var(--sidebar-item-active);
+}
+
+.repo-list__item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.repo-list__item-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.repo-list__item-path {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.repo-list__item-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.repo-list__item.selected {
+    background: var(--sidebar-item-active);
+}
+
+.repo-list__item.selected:hover {
+    background: var(--sidebar-item-active);
+}
+
+/* Context Menu */
+.context-menu {
+    position: fixed;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    min-width: 180px;
+    padding: 4px 0;
+    z-index: 1000;
+}
+
+.context-menu__item {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    text-align: left;
+    font-size: 13px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.context-menu__item:hover {
+    background: var(--sidebar-item-hover);
+}
+
+.context-menu__item--danger {
+    color: var(--status-modified);
+}
+
+.context-menu__item--danger:hover {
+    background: rgba(255, 85, 85, 0.1);
+}
+
+.context-menu__divider {
+    height: 1px;
+    background: var(--border-color);
+    margin: 4px 0;
+}
+
+/* Focus outline for keyboard navigation */
+.repo-list:focus {
+    outline: none;
+}
