@@ -56,17 +56,64 @@ function Dialog({
 
 // Repository window view - gets path from query params
 function RepositoryWindow() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const path = searchParams.get('path') || '';
   const name = searchParams.get('name') || 'Repository';
+  const showAddDialog = searchParams.get('showAddDialog') === 'true';
 
-  return <Repository path={path} name={name} />;
+  const [showDialog, setShowDialog] = useState(showAddDialog);
+
+  // Handle add to list confirm
+  const handleAddToListConfirm = async () => {
+    try {
+      await addRepository(path, name);
+      // Notify main window's RepositoryList to refresh
+      await emit('repo-list-refresh');
+    } catch (error) {
+      console.error('Failed to add repository:', error);
+    }
+    // Remove the dialog param from URL
+    setSearchParams({ path, name });
+    setShowDialog(false);
+  };
+
+  // Handle cancel
+  const handleCancel = () => {
+    setSearchParams({ path, name });
+    setShowDialog(false);
+  };
+
+  return (
+    <>
+      <Repository path={path} name={name} />
+
+      {/* Add to list dialog - shown in repo window */}
+      {showDialog && (
+        <Dialog
+          title="Add to Repository List?"
+          message={
+            <>
+              <p>This repository is not in your list:</p>
+              <p>
+                <strong>{path}</strong>
+              </p>
+              <p>Would you like to add it for quick access?</p>
+            </>
+          }
+          confirmText="Add to List"
+          cancelText="Not Now"
+          onConfirm={handleAddToListConfirm}
+          onCancel={handleCancel}
+        />
+      )}
+    </>
+  );
 }
 
 // 主窗口内容 - 只在 main 窗口运行
 function MainWindowContent() {
   const [dialogState, setDialogState] = useState<{
-    type: 'init' | 'addToList' | null;
+    type: 'init' | null;
     path: string;
   }>({ type: null, path: '' });
 
@@ -94,9 +141,8 @@ function MainWindowContent() {
         // 情况 C：已在列表，直接在新窗口打开
         await openRepoWindow(path, name);
       } else {
-        // 情况 B：不在列表，打开新窗口并询问是否加入
-        await openRepoWindow(path, name);
-        setDialogState({ type: 'addToList', path });
+        // 情况 B：不在列表，打开新窗口并在那里询问是否加入
+        await openRepoWindow(path, name, { showAddDialog: true });
       }
     }
   };
@@ -108,24 +154,11 @@ function MainWindowContent() {
     try {
       await initRepository(path);
       await addRepository(path, name);
+      await emit('repo-list-refresh');
       await openRepoWindow(path, name);
     } catch (error) {
       console.error('Failed to initialize repository:', error);
       alert('Failed to initialize repository: ' + error);
-    }
-    setDialogState({ type: null, path: '' });
-  };
-
-  // 处理加入列表确认
-  const handleAddToListConfirm = async () => {
-    const { path } = dialogState;
-    try {
-      const name = path.split('/').pop() || 'Repository';
-      await addRepository(path, name);
-      // Notify RepositoryList to refresh
-      await emit('repo-list-refresh');
-    } catch (error) {
-      console.error('Failed to add repository:', error);
     }
     setDialogState({ type: null, path: '' });
   };
@@ -166,7 +199,7 @@ function MainWindowContent() {
     <>
       <RepositoryList />
 
-      {/* 初始化仓库对话框 */}
+      {/* 初始化仓库对话框 - 只在主窗口显示 */}
       {dialogState.type === 'init' && (
         <Dialog
           title="Not a Git Repository"
@@ -181,26 +214,6 @@ function MainWindowContent() {
           confirmText="Initialize Repository"
           cancelText="Cancel"
           onConfirm={handleInitConfirm}
-          onCancel={handleCancel}
-        />
-      )}
-
-      {/* 加入列表对话框 */}
-      {dialogState.type === 'addToList' && (
-        <Dialog
-          title="Add to Repository List?"
-          message={
-            <>
-              <p>This repository is not in your list:</p>
-              <p>
-                <strong>{dialogState.path}</strong>
-              </p>
-              <p>Would you like to add it for quick access?</p>
-            </>
-          }
-          confirmText="Add to List"
-          cancelText="Not Now"
-          onConfirm={handleAddToListConfirm}
           onCancel={handleCancel}
         />
       )}
