@@ -24,7 +24,7 @@ A fast, native Git client built with Tauri, React, and Rust.
 ```bash
 # Clone the repository
 git clone https://github.com/cpunion/prism-git.git
-cd prism-git/prism
+cd prism-git
 
 # Install dependencies
 npm install
@@ -60,7 +60,7 @@ When a Prism instance is already running, the CLI sends the path to the existing
 ## Project Structure
 
 ```
-prism/
+prism-git/
 ├── src/                    # React frontend
 │   ├── components/         # Reusable UI components
 │   │   ├── common/         # Button, Badge, Input, Tabs
@@ -71,13 +71,14 @@ prism/
 │   │   └── Repository/     # Repository detail view
 │   ├── api/                # Tauri command wrappers
 │   └── styles/             # CSS variables and global styles
-└── src-tauri/              # Rust backend
-    ├── src/
-    │   ├── main.rs         # Tauri app with IPC server
-    │   ├── cli_main.rs     # CLI binary
-    │   ├── git_ops.rs      # Git operations
-    │   └── config.rs       # Configuration persistence
-    └── capabilities/       # Tauri permissions
+├── src-tauri/              # Rust backend
+│   ├── src/
+│   │   ├── main.rs         # Tauri app with IPC server
+│   │   ├── cli_main.rs     # CLI binary
+│   │   ├── git_ops.rs      # Git operations
+│   │   └── config.rs       # Configuration persistence
+│   └── capabilities/       # Tauri permissions
+└── docs/                   # Documentation
 ```
 
 ## Development
