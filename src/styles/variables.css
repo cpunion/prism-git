@@ -1,14 +1,47 @@
-/* CSS Variables - SourceTree inspired */
+/* CSS Variables - Theme System */
+
+/* Light Theme (Default) */
 :root {
-    /* Primary Colors */
-    --primary-blue: #0052CC;
-    --header-blue: #0747A6;
-    --accent-blue: #4C9AFF;
+    /* Color Scheme */
+    color-scheme: light dark;
+
+    /* Primary */
+    --color-primary: #007AFF;
+    --color-primary-hover: #0051D5;
+    --color-primary-bg: #E5F3FF;
+
+    /* Status Colors */
+    --color-success: #28A745;
+    --color-warning: #FFA500;
+    --color-danger: #D73A49;
+    --color-info: #17A2B8;
+
+    /* Background */
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F6F8FA;
+    --bg-tertiary: #F1F3F5;
+    --bg-hover: #E8EAED;
+
+    /* Text */
+    --text-primary: #24292E;
+    --text-secondary: #586069;
+    --text-tertiary: #6A737D;
+
+    /* Border */
+    --color-border: #E1E4E8;
+    --color-border-light: #EAECEF;
+    --color-border-hover: #D0D7DE;
+
+    /* Diff Colors */
+    --diff-add-bg: #E6FFEC;
+    --diff-add-text: #22863A;
+    --diff-delete-bg: #FFEEF0;
+    --diff-delete-text: #B31D28;
+    --diff-hunk-bg: #F1F8FF;
 
     /* Repository Icon */
     --repo-icon-bg: #4C9AFF;
     --repo-icon-color: #FFFFFF;
-    --repo-icon-size: 48px;
 
     /* Branch Badge */
     --branch-badge-bg: #DFE1E6;
@@ -20,31 +53,19 @@
     --sidebar-text: #172B4D;
     --sidebar-item-hover: #EBECF0;
     --sidebar-item-active: #DEEBFF;
-    --sidebar-width: 220px;
 
-    /* Background */
-    --bg-primary: #FFFFFF;
-    --bg-secondary: #FAFBFC;
-    --bg-tertiary: #F4F5F7;
+    /* Dialog Overlay */
+    --dialog-overlay: rgba(0, 0, 0, 0.5);
+    --dialog-bg: #FFFFFF;
 
-    /* Text */
-    --text-primary: #172B4D;
-    --text-secondary: #5E6C84;
-    --text-tertiary: #6B778C;
-
-    /* Border */
-    --border-color: #DFE1E6;
-    --border-light: #EBECF0;
-
-    /* Status Colors */
-    --status-added: #36B37E;
-    --status-modified: #FFAB00;
-    --status-deleted: #FF5630;
-    --status-renamed: #00B8D9;
+    /* Shadow */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.15);
 
     /* Font */
-    --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif;
-    --font-mono: "SF Mono", Monaco, "Cascadia Code", monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif;
+    --font-mono: "SF Mono", Monaco, "Cascadia Code", Consolas, monospace;
 
     /* Spacing */
     --spacing-xs: 4px;
@@ -55,49 +76,118 @@
     --spacing-2xl: 24px;
 
     /* Border Radius */
-    --radius-sm: 3px;
+    --radius-sm: 4px;
     --radius-md: 6px;
     --radius-lg: 8px;
     --radius-full: 999px;
-
-    /* Shadow */
-    --shadow-sm: 0 1px 1px rgba(9, 30, 66, 0.04), 0 0 1px rgba(9, 30, 66, 0.08);
-    --shadow-md: 0 4px 8px -2px rgba(9, 30, 66, 0.15), 0 0 1px rgba(9, 30, 66, 0.2);
-    --shadow-lg: 0 8px 16px -4px rgba(9, 30, 66, 0.25), 0 0 1px rgba(9, 30, 66, 0.3);
 }
 
-/* Dark Mode */
+/* Dark Theme */
 @media (prefers-color-scheme: dark) {
     :root {
-        --primary-blue: #579DFF;
-        --header-blue: #1D7AFC;
-        --accent-blue: #85B8FF;
+        /* Primary */
+        --color-primary: #58A6FF;
+        --color-primary-hover: #79B8FF;
+        --color-primary-bg: #0D419D;
 
-        --repo-icon-bg: #579DFF;
+        /* Status Colors */
+        --color-success: #3FB950;
+        --color-warning: #D29922;
+        --color-danger: #F85149;
+        --color-info: #58A6FF;
 
-        --branch-badge-bg: #44546F;
-        --branch-badge-text: #B3BAC5;
-        --branch-badge-border: #626F86;
+        /* Background */
+        --bg-primary: #0D1117;
+        --bg-secondary: #161B22;
+        --bg-tertiary: #21262D;
+        --bg-hover: #30363D;
 
-        --sidebar-bg: #1D2125;
-        --sidebar-text: #B6C2CF;
-        --sidebar-item-hover: #2C333A;
-        --sidebar-item-active: #09326C;
+        /* Text */
+        --text-primary: #C9D1D9;
+        --text-secondary: #8B949E;
+        --text-tertiary: #6E7681;
 
-        --bg-primary: #161A1D;
-        --bg-secondary: #1D2125;
-        --bg-tertiary: #22272B;
+        /* Border */
+        --color-border: #30363D;
+        --color-border-light: #21262D;
+        --color-border-hover: #484F58;
 
-        --text-primary: #B6C2CF;
-        --text-secondary: #9FADBC;
-        --text-tertiary: #8C9BAB;
+        /* Diff Colors */
+        --diff-add-bg: rgba(46, 160, 67, 0.2);
+        --diff-add-text: #56D364;
+        --diff-delete-bg: rgba(248, 81, 73, 0.2);
+        --diff-delete-text: #F85149;
+        --diff-hunk-bg: rgba(56, 139, 253, 0.15);
 
-        --border-color: #2C333A;
-        --border-light: #38414A;
+        /* Repository Icon */
+        --repo-icon-bg: #58A6FF;
+        --repo-icon-color: #0D1117;
 
-        --status-added: #4BCE97;
-        --status-modified: #E2B203;
-        --status-deleted: #F87462;
-        --status-renamed: #6CC3E0;
+        /* Branch Badge */
+        --branch-badge-bg: #30363D;
+        --branch-badge-text: #C9D1D9;
+        --branch-badge-border: #484F58;
+
+        /* Sidebar */
+        --sidebar-bg: #161B22;
+        --sidebar-text: #C9D1D9;
+        --sidebar-item-hover: #21262D;
+        --sidebar-item-active: #0D419D;
+
+        /* Dialog Overlay */
+        --dialog-overlay: rgba(0, 0, 0, 0.7);
+        --dialog-bg: #161B22;
+
+        /* Shadow */
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+        --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
     }
+}
+
+/* Manual Theme Override Classes */
+[data-theme="light"] {
+    --color-primary: #007AFF;
+    --color-primary-hover: #0051D5;
+    --color-primary-bg: #E5F3FF;
+    --color-success: #28A745;
+    --color-warning: #FFA500;
+    --color-danger: #D73A49;
+    --color-info: #17A2B8;
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F6F8FA;
+    --bg-tertiary: #F1F3F5;
+    --bg-hover: #E8EAED;
+    --text-primary: #24292E;
+    --text-secondary: #586069;
+    --text-tertiary: #6A737D;
+    --color-border: #E1E4E8;
+    --color-border-light: #EAECEF;
+    --diff-add-bg: #E6FFEC;
+    --diff-delete-bg: #FFEEF0;
+    --sidebar-bg: #F4F5F7;
+    --dialog-bg: #FFFFFF;
+}
+
+[data-theme="dark"] {
+    --color-primary: #58A6FF;
+    --color-primary-hover: #79B8FF;
+    --color-primary-bg: #0D419D;
+    --color-success: #3FB950;
+    --color-warning: #D29922;
+    --color-danger: #F85149;
+    --color-info: #58A6FF;
+    --bg-primary: #0D1117;
+    --bg-secondary: #161B22;
+    --bg-tertiary: #21262D;
+    --bg-hover: #30363D;
+    --text-primary: #C9D1D9;
+    --text-secondary: #8B949E;
+    --text-tertiary: #6E7681;
+    --color-border: #30363D;
+    --color-border-light: #21262D;
+    --diff-add-bg: rgba(46, 160, 67, 0.2);
+    --diff-delete-bg: rgba(248, 81, 73, 0.2);
+    --sidebar-bg: #161B22;
+    --dialog-bg: #161B22;
 }

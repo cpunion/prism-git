@@ -6,13 +6,18 @@
     padding: 0;
 }
 
+html {
+    color-scheme: light dark;
+}
+
 body {
-    font-family: var(--font-family);
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background: var(--bg-primary);
     color: var(--text-primary);
     font-size: 13px;
+    line-height: 1.5;
 }
 
 /* macOS style scrollbar */
@@ -26,7 +31,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--border-color);
+    background: var(--color-border);
     border-radius: 4px;
 }
 
@@ -36,13 +41,13 @@ body {
 
 /* Selection */
 ::selection {
-    background: var(--sidebar-item-active);
-    color: var(--text-primary);
+    background: var(--color-primary);
+    color: white;
 }
 
 /* Focus outline */
 :focus-visible {
-    outline: 2px solid var(--primary-blue);
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
 }
 
@@ -57,7 +62,7 @@ button:focus-visible {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--dialog-overlay);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -65,16 +70,17 @@ button:focus-visible {
 }
 
 .dialog {
-    background: var(--bg-primary);
+    background: var(--dialog-bg);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
+    border: 1px solid var(--color-border);
     min-width: 400px;
     max-width: 500px;
 }
 
 .dialog__header {
     padding: 16px 20px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .dialog__header h2 {
@@ -105,8 +111,59 @@ button:focus-visible {
 
 .dialog__actions {
     padding: 16px 20px;
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid var(--color-border);
     display: flex;
     justify-content: flex-end;
     gap: 12px;
+}
+
+/* Button base styles */
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.button:hover {
+    background: var(--bg-hover);
+    border-color: var(--color-border-hover);
+}
+
+.button--primary {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+.button--primary:hover {
+    background: var(--color-primary-hover);
+    border-color: var(--color-primary-hover);
+}
+
+.button--secondary {
+    background: var(--bg-secondary);
+}
+
+.button--secondary:hover {
+    background: var(--bg-hover);
+}
+
+.button--danger {
+    background: var(--color-danger);
+    border-color: var(--color-danger);
+    color: white;
+}
+
+.button--danger:hover {
+    opacity: 0.9;
 }

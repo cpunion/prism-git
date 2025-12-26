@@ -1,5 +1,6 @@
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Button } from '../../../components/common/Button';
+import { useTheme } from '../../../hooks/useTheme';
 import './Toolbar.css';
 
 interface RepoToolbarProps {
@@ -8,9 +9,22 @@ interface RepoToolbarProps {
 }
 
 export function RepoToolbar({ repoName }: RepoToolbarProps) {
+    const { theme, toggleTheme, resolvedTheme } = useTheme();
+
     const handleClose = async () => {
         const window = getCurrentWindow();
         await window.close();
+    };
+
+    const getThemeIcon = () => {
+        if (theme === 'system') return '🖥️';
+        return resolvedTheme === 'dark' ? '🌙' : '☀️';
+    };
+
+    const getThemeTitle = () => {
+        if (theme === 'light') return 'Light mode (click for dark)';
+        if (theme === 'dark') return 'Dark mode (click for system)';
+        return 'System theme (click for light)';
     };
 
     return (
@@ -47,6 +61,13 @@ export function RepoToolbar({ repoName }: RepoToolbarProps) {
             </div>
 
             <div className="repo-toolbar__right">
+                <button
+                    className="repo-toolbar__icon-btn"
+                    onClick={toggleTheme}
+                    title={getThemeTitle()}
+                >
+                    {getThemeIcon()}
+                </button>
                 <button className="repo-toolbar__icon-btn" title="Terminal">
                     💻
                 </button>
